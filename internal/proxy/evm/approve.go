@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"gitlab.com/distributed_lab/logan/v3/errors"
+	"gitlab.com/tokend/bridge/core/internal/amount"
 	"gitlab.com/tokend/bridge/core/internal/data"
 	"gitlab.com/tokend/bridge/core/internal/proxy/evm/generated/erc1155"
 	"gitlab.com/tokend/bridge/core/internal/proxy/evm/generated/erc20"
@@ -12,9 +13,8 @@ import (
 	"math/big"
 )
 
-func (p *evmProxy) Approve(tokenChain data.TokenChain, approveFrom string) (interface{}, error) {
+func (p *evmProxy) Approve(tokenChain data.TokenChain, approveFrom string, amount *amount.Amount) (interface{}, error) {
 	fromAddress := common.HexToAddress(approveFrom)
-
 	var tx *ethTypes.Transaction
 	var err error
 	switch tokenChain.TokenType {
@@ -22,7 +22,7 @@ func (p *evmProxy) Approve(tokenChain data.TokenChain, approveFrom string) (inte
 		// Approve not needed for native token
 		return nil, nil
 	case TokenTypeErc20:
-		tx, err = p.approveErc20(common.HexToAddress(*tokenChain.ContractAddress), fromAddress)
+		tx, err = p.approveErc20(common.HexToAddress(*tokenChain.ContractAddress), fromAddress, amount)
 	case TokenTypeErc721:
 		tx, err = p.approveErc721(common.HexToAddress(*tokenChain.ContractAddress), fromAddress)
 	case TokenTypeErc1155:
@@ -41,24 +41,33 @@ func (p *evmProxy) Approve(tokenChain data.TokenChain, approveFrom string) (inte
 	return encodeTx(tx, fromAddress, p.chainID, tokenChain.ChainID, nil)
 }
 
-func (p *evmProxy) approveErc20(tokenAddress common.Address, approveFrom common.Address) (*ethTypes.Transaction, error) {
+func (p *evmProxy) approveErc20(tokenAddress common.Address, approveFrom common.Address, amount *amount.Amount) (*ethTypes.Transaction, error) {
 	token, err := erc20.NewErc20(tokenAddress, p.client)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create transactor")
 	}
 
-	amount, err := token.Allowance(&bind.CallOpts{}, approveFrom, p.bridgeContract)
+	decimals, err := p.getDecimals(tokenAddress.String())
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to check allowance")
-	}
-	if amount.Cmp(big.NewInt(0)) == 1 {
-		// Token is already approved
-		return nil, nil
+		return nil, err
 	}
 
-	uin256max := big.NewInt(0)
-	uin256max.SetString("115792089237316195423570985008687907853269984665640564039457584007913129639935", 10)
-	tx, err := token.Approve(buildTransactOpts(approveFrom), p.bridgeContract, uin256max)
+	preparedAmount := big.NewInt(0)
+	preparedAmount.SetString("115792089237316195423570985008687907853269984665640564039457584007913129639935", 10)
+	if amount != nil {
+		preparedAmount = amount.IntWithPrecision(decimals)
+		allowance, err := token.Allowance(&bind.CallOpts{}, approveFrom, p.bridgeContract)
+
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to check allowance")
+		}
+		if allowance.Cmp(preparedAmount) >= 0 {
+			// Token is already approved
+			return nil, nil
+		}
+	}
+
+	tx, err := token.Approve(buildTransactOpts(approveFrom), p.bridgeContract, preparedAmount)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build token approve tx")
 	}

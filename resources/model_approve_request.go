@@ -4,8 +4,12 @@
 
 package resources
 
+import "gitlab.com/tokend/bridge/core/internal/amount"
+
 type ApproveRequest struct {
 	Address string `json:"address"`
-	ChainId string `json:"chain_id"`
-	TokenId string `json:"token_id"`
+	// amount of token to approve
+	Amount  *amount.Amount `json:"amount,omitempty"`
+	ChainId string         `json:"chain_id"`
+	TokenId string         `json:"token_id"`
 }

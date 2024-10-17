@@ -18,7 +18,7 @@ var ErrNotFound = errors.New("not found")
 var ErrWrongSignedTx = errors.New("signed tx does not match tx log")
 
 type Proxy interface {
-	Approve(tokenChain data.TokenChain, approveFrom string) (interface{}, error)
+	Approve(tokenChain data.TokenChain, approveFrom string, amount *amount.Amount) (interface{}, error)
 	LockFungible(params FungibleLockParams) (interface{}, error)
 	LockNonFungible(params NonFungibleLockParams) (interface{}, error)
 	CheckFungibleLockEvent(txHash string, eventIndex int, tokenChain data.TokenChain) (*FungibleLockEvent, error)

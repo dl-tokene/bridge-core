@@ -5,6 +5,7 @@ import (
 	"gitlab.com/distributed_lab/ape"
 	"gitlab.com/distributed_lab/ape/problems"
 	"gitlab.com/distributed_lab/logan/v3/errors"
+	"gitlab.com/tokend/bridge/core/internal/proxy/evm"
 	"gitlab.com/tokend/bridge/core/internal/service/models"
 	"gitlab.com/tokend/bridge/core/internal/service/requests"
 	"net/http"
@@ -34,8 +35,15 @@ func Approve(w http.ResponseWriter, r *http.Request) {
 		})...)
 		return
 	}
+	if tokenChain.TokenType != evm.TokenTypeErc20 && req.Amount != nil {
+		Log(r).WithError(err).Debug("unexpectedly received an amount field for non-ERC20 ")
+		ape.RenderErr(w, problems.BadRequest(validation.Errors{
+			"data": errors.New("amount is intended for ERC20 tokens"),
+		})...)
+		return
+	}
 
-	tx, err := ProxyRepo(r).Get(tokenChain.ChainID).Approve(*tokenChain, req.Address)
+	tx, err := ProxyRepo(r).Get(tokenChain.ChainID).Approve(*tokenChain, req.Address, req.Amount)
 	if err != nil {
 		Log(r).WithError(err).Error("failed to approve")
 		ape.RenderErr(w, problems.InternalError())
