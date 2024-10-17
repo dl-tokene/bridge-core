@@ -10,6 +10,10 @@ type TokenChainsQ interface {
 	FilterByBridgingType(types ...BridgingType) TokenChainsQ
 }
 
+type BridgingTypeQ interface {
+	IsWrapped() bool
+}
+
 type TokenChain struct {
 	TokenID         string
 	ChainID         string       `fig:"chain_id,required"`
@@ -19,9 +23,31 @@ type TokenChain struct {
 	AutoSend        bool         `fig:"auto_send"`
 }
 
-type BridgingType string
+type BridgingType uint8
 
 const (
-	BridgingTypeLP      BridgingType = "liquidity_pool"
-	BridgingTypeWrapped BridgingType = "wrapped"
+	BridgingTypeLP BridgingType = iota
+	BridgingTypeWrapped
+	BridgingTypeUSDC
 )
+
+func (b BridgingType) IsLiquidPool() bool {
+	if b > BridgingTypeUSDC {
+		panic("unsupported bridging type")
+	}
+	return b == BridgingTypeLP
+}
+
+func (b BridgingType) IsWrapped() bool {
+	if b > BridgingTypeUSDC {
+		panic("unsupported bridging type")
+	}
+	return b == BridgingTypeWrapped
+}
+
+func (b BridgingType) IsUSDC() bool {
+	if b > BridgingTypeUSDC {
+		panic("unsupported bridging type")
+	}
+	return b == BridgingTypeUSDC
+}

@@ -160,8 +160,9 @@ func (p *evmProxy) redeemErc20(params types.FungibleRedeemParams, sender common.
 		TxHash:       txHash,
 		EventIndex:   params.EventIndex,
 		ChainID:      p.chainID,
-		IsWrapped:    isWrappedToken(params.TokenChain.BridgingType),
+		BridgingType: params.TokenChain.BridgingType,
 	}
+
 	sign, err := p.signer.Sign(&log)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to sign log")
@@ -173,7 +174,7 @@ func (p *evmProxy) redeemErc20(params types.FungibleRedeemParams, sender common.
 		common.HexToAddress(params.Receiver),
 		txHash,
 		big.NewInt(int64(params.EventIndex)),
-		log.IsWrapped,
+		uint8(params.TokenChain.BridgingType),
 		[][]byte{sign},
 	)
 }
@@ -193,7 +194,7 @@ func (p *evmProxy) redeemErc721(params types.NonFungibleRedeemParams, sender com
 		EventIndex:   params.EventIndex,
 		ChainID:      p.chainID,
 		TokenUri:     params.NftUri,
-		IsWrapped:    isWrappedToken(params.TokenChain.BridgingType),
+		BridgingType: params.TokenChain.BridgingType,
 	}
 	sign, err := p.signer.Sign(&log)
 	if err != nil {
@@ -207,7 +208,7 @@ func (p *evmProxy) redeemErc721(params types.NonFungibleRedeemParams, sender com
 		txHash,
 		big.NewInt(int64(params.EventIndex)),
 		params.NftUri,
-		log.IsWrapped,
+		uint8(params.TokenChain.BridgingType),
 		[][]byte{sign},
 	)
 }
@@ -229,7 +230,7 @@ func (p *evmProxy) redeemErc1155(params types.NonFungibleRedeemParams, sender co
 		EventIndex:   params.EventIndex,
 		ChainID:      p.chainID,
 		TokenUri:     params.NftUri,
-		IsWrapped:    isWrappedToken(params.TokenChain.BridgingType),
+		BridgingType: params.TokenChain.BridgingType,
 	}
 	sign, err := p.signer.Sign(&log)
 	if err != nil {
@@ -244,7 +245,7 @@ func (p *evmProxy) redeemErc1155(params types.NonFungibleRedeemParams, sender co
 		txHash,
 		big.NewInt(int64(params.EventIndex)),
 		params.NftUri,
-		log.IsWrapped,
+		uint8(params.TokenChain.BridgingType),
 		[][]byte{sign},
 	)
 }

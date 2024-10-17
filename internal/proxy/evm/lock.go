@@ -53,7 +53,7 @@ func (p *evmProxy) lockErc20(params types.FungibleLockParams) (interface{}, erro
 		params.Amount.IntWithPrecision(decimals),
 		params.Receiver,
 		params.DestinationChain,
-		isWrappedToken(params.TokenChain.BridgingType),
+		uint8(params.TokenChain.BridgingType),
 	)
 
 	return encodeTx(tx, senderAddr, p.chainID, params.TokenChain.ChainID, nil)
@@ -71,7 +71,7 @@ func (p *evmProxy) lockErc721(params types.NonFungibleLockParams) (interface{}, 
 		tokenId,
 		params.Receiver,
 		params.DestinationChain,
-		isWrappedToken(params.TokenChain.BridgingType),
+		uint8(params.TokenChain.BridgingType),
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deposit erc721 transaction")
@@ -94,7 +94,7 @@ func (p *evmProxy) lockErc1155(params types.NonFungibleLockParams) (interface{},
 		big.NewInt(1),
 		params.Receiver,
 		params.DestinationChain,
-		isWrappedToken(params.TokenChain.BridgingType),
+		uint8(params.TokenChain.BridgingType),
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to build deposit erc1155 transaction")
