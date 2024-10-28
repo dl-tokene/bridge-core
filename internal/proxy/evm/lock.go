@@ -86,12 +86,17 @@ func (p *evmProxy) lockErc1155(params types.NonFungibleLockParams) (interface{},
 	if !ok {
 		return nil, errors.New("failed to parse token id")
 	}
+
+	preparedAmount := big.NewInt(1)
+	if params.Amount != nil {
+		preparedAmount = params.Amount.IntWithPrecision(0)
+	}
+
 	tx, err := p.bridge.DepositERC1155(
 		buildTransactOpts(senderAddr),
 		common.HexToAddress(*params.TokenChain.ContractAddress),
 		tokenId,
-		// TODO: Allow to specify amount for fungible tokens
-		big.NewInt(1),
+		preparedAmount,
 		params.Receiver,
 		params.DestinationChain,
 		uint8(params.TokenChain.BridgingType),

@@ -7,7 +7,7 @@ package resources
 import "gitlab.com/tokend/bridge/core/internal/amount"
 
 type LockRequest struct {
-	// amount of token to transfer, should be presented only for fungible tokens transfer
+	// amount of token to transfer, should be presented only for fungible tokens transfer or ERC1155
 	Amount    *amount.Amount `json:"amount,omitempty"`
 	ChainFrom string         `json:"chain_from"`
 	ChainTo   string         `json:"chain_to"`

@@ -50,6 +50,7 @@ type NonFungibleLockParams struct {
 	Receiver         string
 	DestinationChain string
 	NftId            string
+	Amount           *amount.Amount
 }
 
 type FungibleLockEvent struct {

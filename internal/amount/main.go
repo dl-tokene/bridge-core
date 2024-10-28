@@ -79,6 +79,11 @@ func (a Amount) String() string {
 	return stringU(a.Int())
 }
 
+func (a Amount) IsUint() bool {
+	i := a.Int()
+	return i.Mod(i, One).Cmp(big.NewInt(0)) == 0 && i.IsUint64()
+}
+
 func parseU(v string) (*big.Int, error) {
 	var f, o, r big.Rat
 

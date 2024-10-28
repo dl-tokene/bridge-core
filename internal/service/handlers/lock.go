@@ -9,10 +9,12 @@ import (
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/bridge/core/internal/amount"
 	"gitlab.com/tokend/bridge/core/internal/data"
+	"gitlab.com/tokend/bridge/core/internal/proxy/evm"
 	"gitlab.com/tokend/bridge/core/internal/proxy/types"
 	"gitlab.com/tokend/bridge/core/internal/service/models"
 	"gitlab.com/tokend/bridge/core/internal/service/requests"
 	"gitlab.com/tokend/bridge/core/resources"
+	"math/big"
 	"net/http"
 )
 
@@ -104,6 +106,13 @@ func Lock(w http.ResponseWriter, r *http.Request) {
 			})...)
 			return
 		}
+		if req.Amount.Int().Cmp(big.NewInt(0)) == 0 {
+			Log(r).WithError(err).Debug("amount must be greater than 0")
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"data/amount": errors.New("amount must be greater than 0"),
+			})...)
+			return
+		}
 		tx, err = ProxyRepo(r).Get(tokenChain.ChainID).LockFungible(types.FungibleLockParams{
 			TokenChain:       *tokenChain,
 			Sender:           req.Sender,
@@ -119,12 +128,37 @@ func Lock(w http.ResponseWriter, r *http.Request) {
 			})...)
 			return
 		}
+		if req.Amount != nil {
+			if tokenChain.TokenType != evm.TokenTypeErc1155 {
+				Log(r).WithError(err).Debug("amount field is not intended for type ERC721")
+				ape.RenderErr(w, problems.BadRequest(validation.Errors{
+					"data/nft_id": errors.New("amount field is not intended for type ERC721"),
+				})...)
+				return
+			}
+			if req.Amount.Int().Cmp(big.NewInt(0)) == 0 {
+				Log(r).WithError(err).Debug("amount must be greater than 0")
+				ape.RenderErr(w, problems.BadRequest(validation.Errors{
+					"data/amount": errors.New("amount must be greater than 0"),
+				})...)
+				return
+			}
+			if !req.Amount.IsUint() {
+				Log(r).WithError(err).Debug("amount is not uint")
+				ape.RenderErr(w, problems.BadRequest(validation.Errors{
+					"data/nft_id": errors.New("amount is not uint"),
+				})...)
+				return
+			}
+
+		}
 		tx, err = ProxyRepo(r).Get(tokenChain.ChainID).LockNonFungible(types.NonFungibleLockParams{
 			TokenChain:       *tokenChain,
 			Sender:           req.Sender,
 			Receiver:         req.Receiver,
 			DestinationChain: req.ChainTo,
 			NftId:            *req.NftId,
+			Amount:           req.Amount,
 		})
 	default:
 		Log(r).Errorf("token type is not supported %s, token id - %s", token.Type, token.ID)
