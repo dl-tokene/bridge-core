@@ -12,12 +12,13 @@ var ErrTxFailed = errors.New("tx failed")
 var ErrEventNotFound = errors.New("log not found")
 var ErrWrongLockEvent = errors.New("metadata is incorrect")
 var ErrWrongToken = errors.New("token is incorrect")
+var ErrWrongBridgeContract = errors.New("bridge contract is incorrect")
 var ErrAlreadyRedeemed = errors.New("transaction is already redeemed")
 var ErrNotFound = errors.New("not found")
 var ErrWrongSignedTx = errors.New("signed tx does not match tx log")
 
 type Proxy interface {
-	Approve(tokenChain data.TokenChain, approveFrom string) (interface{}, error)
+	Approve(tokenChain data.TokenChain, approveFrom string, amount *amount.Amount) (interface{}, error)
 	LockFungible(params FungibleLockParams) (interface{}, error)
 	LockNonFungible(params NonFungibleLockParams) (interface{}, error)
 	CheckFungibleLockEvent(txHash string, eventIndex int, tokenChain data.TokenChain) (*FungibleLockEvent, error)
@@ -49,6 +50,7 @@ type NonFungibleLockParams struct {
 	Receiver         string
 	DestinationChain string
 	NftId            string
+	Amount           *amount.Amount
 }
 
 type FungibleLockEvent struct {

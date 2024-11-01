@@ -8,6 +8,7 @@ import (
 	"gitlab.com/tokend/bridge/core/internal/ipfs"
 	"gitlab.com/tokend/bridge/core/internal/proxy/evm/generated/bridge"
 	"gitlab.com/tokend/bridge/core/internal/proxy/evm/signature"
+	"gitlab.com/tokend/bridge/core/internal/proxy/sender/evm"
 	"gitlab.com/tokend/bridge/core/internal/proxy/types"
 	"math/big"
 )
@@ -19,7 +20,7 @@ const (
 	TokenTypeErc1155 = "erc1155"
 )
 
-func NewProxy(rpc string, signer signature.Signer, bridgeContract string, ipfs ipfs.Client, confirmations int) (types.Proxy, error) {
+func NewProxy(rpc string, signer signature.Signer, bridgeContract string, ipfs ipfs.Client, confirmations int, sender evm.Sender) (types.Proxy, error) {
 	client, err := ethclient.Dial(rpc)
 	if err != nil {
 		return nil, err
@@ -43,6 +44,7 @@ func NewProxy(rpc string, signer signature.Signer, bridgeContract string, ipfs i
 		bridge:         b,
 		ipfsClient:     ipfs,
 		confirmations:  confirmations,
+		sender:         sender,
 	}, nil
 }
 
@@ -54,4 +56,5 @@ type evmProxy struct {
 	bridge         *bridge.Bridge
 	ipfsClient     ipfs.Client
 	confirmations  int
+	sender         evm.Sender
 }

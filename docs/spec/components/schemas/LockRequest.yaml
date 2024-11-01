@@ -19,7 +19,7 @@ properties:
   amount:
     type: string
     format: amount.Amount
-    description: amount of token to transfer, should be presented only for fungible tokens transfer
+    description: amount of token to transfer, should be presented only for fungible tokens transfer or ERC1155
     example: "0.001"
   nft_id:
     type: string

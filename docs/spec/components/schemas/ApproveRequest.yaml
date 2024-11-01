@@ -10,3 +10,7 @@ properties:
     type: string
   token_id:
     type: string
+  amount:
+    type: string
+    format: amount.Amount
+    description: amount of token to approve
