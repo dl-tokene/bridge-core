@@ -1,7 +1,6 @@
 package evm
 
 import (
-	"context"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
@@ -55,7 +54,11 @@ func (p *evmProxy) RedeemFungible(params types.FungibleRedeemParams) (interface{
 	confirmed := signNumber >= threshold
 
 	if params.TokenChain.AutoSend && confirmed {
-		return p.sendTx(tx, params.TokenChain.ChainID)
+		txHash, err := p.sender.SendTx(tx)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to send tx")
+		}
+		return encodeProcessedTx(txHash, params.TokenChain.ChainID), nil
 	}
 
 	return encodeTx(tx, common.HexToAddress(params.Sender), p.chainID, params.TokenChain.ChainID, &confirmed)
@@ -103,7 +106,11 @@ func (p *evmProxy) RedeemNonFungible(params types.NonFungibleRedeemParams) (inte
 	confirmed := signNumber >= threshold
 
 	if params.TokenChain.AutoSend && confirmed {
-		return p.sendTx(tx, params.TokenChain.ChainID)
+		txHash, err := p.sender.SendTx(tx)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to send tx")
+		}
+		return encodeProcessedTx(txHash, params.TokenChain.ChainID), nil
 	}
 
 	return encodeTx(tx, common.HexToAddress(params.Sender), p.chainID, params.TokenChain.ChainID, &confirmed)
@@ -248,17 +255,6 @@ func (p *evmProxy) redeemErc1155(params types.NonFungibleRedeemParams, sender co
 		uint8(params.TokenChain.BridgingType),
 		[][]byte{sign},
 	)
-}
-
-func (p *evmProxy) sendTx(tx *ethTypes.Transaction, chain string) (interface{}, error) {
-	tx, err := p.signer.SignTx(tx, p.chainID)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to sign tx")
-	}
-
-	err = p.client.SendTransaction(context.TODO(), tx)
-
-	return encodeProcessedTx(tx.Hash(), chain), errors.Wrap(err, "failed to send tx")
 }
 
 func (p *evmProxy) getThreshold() (int64, error) {
