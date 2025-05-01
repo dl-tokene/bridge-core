@@ -8,6 +8,7 @@ import (
 	"gitlab.com/tokend/bridge/core/internal/data"
 	"gitlab.com/tokend/bridge/core/internal/proxy/evm/generated/erc1155"
 	"gitlab.com/tokend/bridge/core/internal/proxy/evm/generated/erc20"
+	"gitlab.com/tokend/bridge/core/internal/proxy/evm/generated/erc2612"
 	"gitlab.com/tokend/bridge/core/internal/proxy/evm/generated/erc721"
 	"math/big"
 )
@@ -22,6 +23,13 @@ func (p *evmProxy) Approve(tokenChain data.TokenChain, approveFrom string) (inte
 		// Approve not needed for native token
 		return nil, nil
 	case TokenTypeErc20:
+		check, err := p.checkErc2612(common.HexToAddress(*tokenChain.ContractAddress))
+		if err != nil {
+			return nil, err
+		}
+		if check {
+			return p.encodePermitSign(*tokenChain.ContractAddress, approveFrom)
+		}
 		tx, err = p.approveErc20(common.HexToAddress(*tokenChain.ContractAddress), fromAddress)
 	case TokenTypeErc721:
 		tx, err = p.approveErc721(common.HexToAddress(*tokenChain.ContractAddress), fromAddress)
@@ -110,4 +118,23 @@ func (p *evmProxy) approveErc1155(tokenAddress common.Address, approveFrom commo
 	}
 
 	return tx, err
+}
+
+func (p *evmProxy) checkErc2612(tokenAddress common.Address) (bool, error) {
+	instance, err := erc2612.NewErc2612(tokenAddress, p.client)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to create transactor")
+	}
+
+	_, err = instance.DOMAINSEPARATOR(&bind.CallOpts{})
+	if err != nil {
+		return false, nil
+	}
+
+	_, err = instance.Nonces(&bind.CallOpts{}, common.Address{})
+	if err != nil {
+		return false, nil
+	}
+
+	return true, nil
 }
