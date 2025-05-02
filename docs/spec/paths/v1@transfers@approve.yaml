@@ -2,7 +2,7 @@ post:
   tags:
     - Transfers
   summary: Approve token
-  description: Checks if user approved bridge contract to use his tokens. If approval needed generates transaction to approve tokens, in other case returns 204 status code
+  description: Checks if user approved bridge contract to use his tokens. If approval needed generates transaction to approve tokens, if permit can be used instead returns data for signing, in other case returns 204 status code
   operationId: approveToken
   responses:
     '200':
@@ -13,7 +13,9 @@ post:
             type: object
             properties:
               data:
-                $ref: '#/components/schemas/Transaction'
+                oneOf:
+                  - $ref: '#/components/schemas/Transaction'
+                  - $ref: '#/components/schemas/Permit'
               included:
                 type: array
                 items:

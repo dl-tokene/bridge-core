@@ -1,0 +1,18 @@
+type: object
+required:
+  - types
+  - primary_type
+  - domain
+  - message
+properties:
+  types:
+    type: array
+    items:
+      $ref: '#/components/schemas/PermitTypeDefinition'
+  primary_type:
+    type: string
+    description: Type of the operation ("Permit")
+  domain:
+    $ref: '#/components/schemas/PermitEip712Domain'
+  message:
+    $ref: '#/components/schemas/PermitMessage'

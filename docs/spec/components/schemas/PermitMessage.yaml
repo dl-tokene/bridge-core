@@ -1,0 +1,23 @@
+type: object
+required:
+  - owner
+  - spender
+  - value
+  - nonce
+  - deadline
+properties:
+  owner:
+    type: string
+    description: The address of tokens owner
+  spender:
+    type: string
+    description: The address of spending contract
+  value:
+    type: string
+    description: Amount of token decimals to spent
+  nonce:
+    type: string
+    description: Current nonce of the owner
+  deadline:
+    type: string
+    description: UNIX-format time after which signature isn't valid (set to current time + 5 minutes)
