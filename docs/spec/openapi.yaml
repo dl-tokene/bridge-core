@@ -24,6 +24,7 @@ info:
     
     - [GET /tokens/{token}/balance](#operation/getBalance)
     - [GET /tokens/{token}/nfts/{nft_id}](#operation/getNFT)
+    - [GET /tokens/{token}/decimals](#operation/getDecimals)
 servers:
   - url: 'https://bridge.demo.io'
     description: Bridge

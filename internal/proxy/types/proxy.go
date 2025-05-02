@@ -33,6 +33,9 @@ type Proxy interface {
 	BridgeBalance(tokenChain data.TokenChain, nftId *string) (amount.Amount, error)
 	GetNftMetadataUri(tokenChain data.TokenChain, nftId string) (string, error)
 	GetNftMetadata(tokenChain data.TokenChain, nftId string) (*NftMetadata, error)
+	// Decimals returns amount of decimal signs for the given fungible token
+	// For non-fungible tokens it returns error
+	Decimals(tokenChain data.TokenChain) (int, error)
 }
 
 type FungibleLockParams struct {

@@ -34,6 +34,7 @@ func (s *service) router() chi.Router {
 			r.Get("/", handlers.Tokens)
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/balance", handlers.GetBalance)
+				r.Get("/decimals", handlers.GetDecimals)
 				r.Get("/nfts/{nft_id}", handlers.GetNft)
 			})
 		})
