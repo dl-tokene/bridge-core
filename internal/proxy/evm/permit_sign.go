@@ -17,8 +17,8 @@ type TypeDefinition struct {
 type Eip712Domain struct {
 	Name              string `json:"name"`
 	Version           string `json:"version"`
-	ChainID           string `json:"chainId"`
-	VerifyingContract string `json:"verifyingContract"`
+	ChainID           string `json:"chain_id"`
+	VerifyingContract string `json:"verifying_contract"`
 }
 
 type PermitMessage struct {
@@ -31,7 +31,7 @@ type PermitMessage struct {
 
 type PermitSign struct {
 	Types       map[string][]TypeDefinition `json:"types"`
-	PrimaryType string                      `json:"primaryType"`
+	PrimaryType string                      `json:"primary_type"`
 	Domain      Eip712Domain                `json:"domain"`
 	Message     PermitMessage               `json:"message"`
 }
@@ -46,6 +46,10 @@ func (p *evmProxy) encodePermitSign(tokenAddress, owner string) (interface{}, er
 		return nil, err
 	}
 	tokenName, err := token.Name(&bind.CallOpts{})
+	if err != nil {
+		return nil, err
+	}
+	tokenVersion, err := token.Version(&bind.CallOpts{})
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +86,7 @@ func (p *evmProxy) encodePermitSign(tokenAddress, owner string) (interface{}, er
 
 	domain := Eip712Domain{
 		Name:              tokenName,
-		Version:           "1",
+		Version:           tokenVersion,
 		ChainID:           chainId.String(),
 		VerifyingContract: tokenAddress,
 	}
