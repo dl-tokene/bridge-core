@@ -18,6 +18,12 @@ post:
                 type: array
                 items:
                   $ref: '#/components/schemas/Chain'
+    '400':
+      description: incorrect decimals amount
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/Errors'
     '401':
       description: blob creation not allowed
       content:
