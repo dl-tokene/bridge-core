@@ -5,8 +5,10 @@ import (
 	"gitlab.com/distributed_lab/ape"
 	"gitlab.com/distributed_lab/ape/problems"
 	"gitlab.com/distributed_lab/logan/v3/errors"
+	"gitlab.com/tokend/bridge/core/internal/proxy/evm"
 	"gitlab.com/tokend/bridge/core/internal/service/models"
 	"gitlab.com/tokend/bridge/core/internal/service/requests"
+	"gitlab.com/tokend/bridge/core/resources"
 	"net/http"
 )
 
@@ -54,5 +56,10 @@ func Approve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ape.Render(w, models.NewTxResponse(tx, *chain))
+	switch tx.(type) {
+	case resources.EvmTransaction:
+		ape.Render(w, models.NewTxResponse(tx, *chain))
+	case evm.PermitSign:
+		ape.Render(w, models.NewPermitResponse(tx, *chain))
+	}
 }

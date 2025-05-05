@@ -1,0 +1,19 @@
+type: object
+required:
+  - name
+  - version
+  - chain_id
+  - verifying_contract
+properties:
+  name:
+    type: string
+    description: Name of the token to permit
+  version:
+    type: string
+    description: Version of the token to permit
+  chain_id:
+    type: string
+    description: ID of chain where to perform permit
+  verifying_contract:
+    type: string
+    description: Address of the token contract
