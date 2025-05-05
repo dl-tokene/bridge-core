@@ -1,0 +1,14 @@
+allOf:
+  - $ref: '#/components/schemas/DecimalsKey'
+  - type: object
+    required:
+      - attributes
+    properties:
+      attributes:
+        type: object
+        required:
+          - decimals
+        properties:
+          decimals:
+            type: int
+            description: Decimals of the non-fungible token

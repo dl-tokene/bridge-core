@@ -79,6 +79,13 @@ func (a Amount) String() string {
 	return stringU(a.Int())
 }
 
+func (a Amount) HasCorrectDecimals(decimals int) bool {
+	exp := big.NewInt(int64(DefaultPrecision - decimals))
+	exp = exp.Exp(big.NewInt(10), exp, nil)
+	rem := big.NewInt(0).Rem(a.Int(), exp)
+	return rem.Cmp(big.NewInt(0)) == 0
+}
+
 func parseU(v string) (*big.Int, error) {
 	var f, o, r big.Rat
 
