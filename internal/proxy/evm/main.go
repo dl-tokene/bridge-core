@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"gitlab.com/tokend/bridge/core/internal/ipfs"
 	"gitlab.com/tokend/bridge/core/internal/proxy/evm/generated/bridge"
+	"gitlab.com/tokend/bridge/core/internal/proxy/evm/sending"
 	"gitlab.com/tokend/bridge/core/internal/proxy/evm/signature"
 	"gitlab.com/tokend/bridge/core/internal/proxy/types"
 	"math/big"
@@ -25,6 +26,11 @@ func NewProxy(rpc string, signer signature.Signer, bridgeContract string, ipfs i
 		return nil, err
 	}
 
+	sender, err := sending.NewSender(client, signer)
+	if err != nil {
+		return nil, err
+	}
+
 	chainID, err := client.ChainID(context.TODO())
 	if err != nil {
 		return nil, err
@@ -38,6 +44,7 @@ func NewProxy(rpc string, signer signature.Signer, bridgeContract string, ipfs i
 	return &evmProxy{
 		client:         client,
 		signer:         signer,
+		sender:         sender,
 		chainID:        chainID,
 		bridgeContract: common.HexToAddress(bridgeContract),
 		bridge:         b,
@@ -49,6 +56,7 @@ func NewProxy(rpc string, signer signature.Signer, bridgeContract string, ipfs i
 type evmProxy struct {
 	client         *ethclient.Client
 	signer         signature.Signer
+	sender         types.Sender
 	chainID        *big.Int
 	bridgeContract common.Address
 	bridge         *bridge.Bridge
