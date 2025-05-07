@@ -55,21 +55,6 @@ func Lock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	decimals, err := ProxyRepo(r).Get(tokenChain.ChainID).Decimals(*tokenChain)
-	if err != nil {
-		Log(r).WithError(err).Error("failed to get token decimals")
-		ape.RenderErr(w, problems.InternalError())
-		return
-	}
-	Log(r).Infof("token actual decimals: %d, user input: %d", decimals, req.Amount.Int().Int64())
-	if !req.Amount.HasCorrectDecimals(decimals) {
-		Log(r).WithError(err).Errorf("amount has too many decimal digits, max is %d", decimals)
-		ape.RenderErr(w, problems.BadRequest(validation.Errors{
-			"amount": errors.New(fmt.Sprintf("amount has too many decimal digits, maximum for this token is %d", decimals)),
-		})...)
-		return
-	}
-
 	destTokenChain, err := TokenChainsQ(r).
 		FilterByTokenID(req.TokenId).
 		FilterByChainID(req.ChainTo).
@@ -116,6 +101,19 @@ func Lock(w http.ResponseWriter, r *http.Request) {
 			Log(r).WithError(err).Debug("amount is not set")
 			ape.RenderErr(w, problems.BadRequest(validation.Errors{
 				"data/amount": errors.New("amount is not set"),
+			})...)
+			return
+		}
+		decimals, err := ProxyRepo(r).Get(tokenChain.ChainID).Decimals(*tokenChain)
+		if err != nil {
+			Log(r).WithError(err).Error("failed to get token decimals")
+			ape.RenderErr(w, problems.InternalError())
+			return
+		}
+		if !req.Amount.HasCorrectDecimals(decimals) {
+			Log(r).WithError(err).Errorf("amount has too many decimal digits, max is %d", decimals)
+			ape.RenderErr(w, problems.BadRequest(validation.Errors{
+				"amount": errors.New(fmt.Sprintf("amount has too many decimal digits, maximum for this token is %d", decimals)),
 			})...)
 			return
 		}
