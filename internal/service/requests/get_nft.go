@@ -3,7 +3,6 @@ package requests
 import (
 	"github.com/go-chi/chi"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/distributed_lab/urlval"
 	"net/http"
@@ -33,8 +32,8 @@ func NewGetNftRequest(r *http.Request) (GetNftRequest, error) {
 
 func (r GetNftRequest) Validate() error {
 	return validation.ValidateStruct(&r,
-		validation.Field(&r.TokenId, validation.Required, is.Int),
-		validation.Field(&r.NftId, validation.Required, is.Int),
-		validation.Field(&r.Chain, validation.Required, is.Int),
+		validation.Field(&r.TokenId, validation.Required),
+		validation.Field(&r.NftId, validation.Required),
+		validation.Field(&r.Chain, validation.Required),
 	)
 }

@@ -3,7 +3,6 @@ package requests
 import (
 	"encoding/json"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"gitlab.com/distributed_lab/logan/v3/errors"
 	"gitlab.com/tokend/bridge/core/resources"
 	"net/http"
@@ -29,12 +28,12 @@ func NewLockRequest(r *http.Request) (resources.LockRequest, error) {
 
 func (r LockRequest) Validate() error {
 	return validation.ValidateStruct(&r,
-		validation.Field(&r.TokenId, validation.Required, is.Int),
-		validation.Field(&r.ChainFrom, validation.Required, is.Int),
-		validation.Field(&r.ChainTo, validation.Required, is.Int),
+		validation.Field(&r.TokenId, validation.Required),
+		validation.Field(&r.ChainFrom, validation.Required),
+		validation.Field(&r.ChainTo, validation.Required),
 		validation.Field(&r.Sender, validation.Required, validation.By(isHexAddress)),
 		validation.Field(&r.Receiver, validation.Required, validation.By(isHexAddress)),
-		
-		validation.Field(&r.NftId, is.Int),
+
+		validation.Field(&r.NftId),
 	)
 }

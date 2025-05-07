@@ -33,9 +33,9 @@ func NewGetBalanceRequest(r *http.Request) (GetBalanceRequest, error) {
 
 func (r GetBalanceRequest) Validate() error {
 	return validation.ValidateStruct(&r,
-		validation.Field(&r.TokenId, validation.Required, is.Int),
+		validation.Field(&r.TokenId, validation.Required),
 		validation.Field(&r.Address, validation.Required, validation.By(isHexAddress)),
-		validation.Field(&r.Chain, validation.Required, is.Int),
+		validation.Field(&r.Chain, validation.Required),
 		validation.Field(&r.Nft, is.Int),
 	)
 }
