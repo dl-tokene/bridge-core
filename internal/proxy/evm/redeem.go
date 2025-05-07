@@ -55,7 +55,7 @@ func (p *evmProxy) RedeemFungible(params types.FungibleRedeemParams) (interface{
 	confirmed := signNumber >= threshold
 
 	if params.TokenChain.AutoSend && confirmed {
-		return p.sendTx(tx, params.TokenChain.ChainID)
+		return p.sender.SendTx(tx, p.chainID)
 	}
 
 	return encodeTx(tx, common.HexToAddress(params.Sender), p.chainID, params.TokenChain.ChainID, &confirmed)
@@ -103,7 +103,7 @@ func (p *evmProxy) RedeemNonFungible(params types.NonFungibleRedeemParams) (inte
 	confirmed := signNumber >= threshold
 
 	if params.TokenChain.AutoSend && confirmed {
-		return p.sendTx(tx, params.TokenChain.ChainID)
+		return p.sender.SendTx(tx, p.chainID)
 	}
 
 	return encodeTx(tx, common.HexToAddress(params.Sender), p.chainID, params.TokenChain.ChainID, &confirmed)
